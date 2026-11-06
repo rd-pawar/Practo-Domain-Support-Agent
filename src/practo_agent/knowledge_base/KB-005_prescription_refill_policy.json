@@ -1,0 +1,8 @@
+{
+    "id": "KB-005",
+    "topic": "prescription_refill_policy",
+    "version": "1.0",
+    "effective_date": "2024-01-01",
+    "parent_doc_id": "KB-005",
+    "content": "The clinic does not issue prescription refills without a valid consultation; patients requiring ongoing medication must schedule a follow-up appointment with their treating doctor. Prescription refill requests can be submitted through the clinic portal at least 5 business days before the existing supply runs out, and approval is at the doctor's clinical discretion. Controlled substances and certain specialty medications require an in-person consultation and cannot be refilled remotely under any circumstances. Once approved, the prescription is sent electronically to the patient's registered pharmacy or made available for collection at the clinic's dispensary counter. Patients should ensure their current prescriptions have not expired; expired prescriptions will not be accepted for refill."
+}

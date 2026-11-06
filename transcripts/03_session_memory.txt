@@ -1,0 +1,58 @@
+TRANSCRIPT: Session Memory Demo (Same-Session vs Fresh-Session)
+============================================================
+Mode: MOCK_LLM – InMemoryChatMessageHistory per session_id
+
+RULE: Appointment status is RE-FETCHED live on every request.
+      Memory is CONTEXT, not an authoritative record.
+============================================================
+
+════════════════════════════════════════════════════════════
+SESSION A (session-memory-A) – Multi-turn context
+════════════════════════════════════════════════════════════
+
+[Turn 1] Patient: "How far ahead should I book an appointment?"
+[Agent]  "You can book appointments up to 30 days in advance via the
+          clinic portal. For Cardiology, 3-5 business days ahead is
+          recommended."
+
+[Turn 2] Patient: "What about cancelling if I need to?"
+          (Memory context injected: 1 prior exchange about booking)
+[Agent]  "Based on our cancellation policy, you need to provide at least
+          24 hours notice to cancel without a fee. Cancellations within
+          24 hours may incur a 10% late-cancellation fee."
+
+[Turn 3] Patient: "And what is the status of APT-0001?"
+          (Memory context: 2 prior exchanges; appointment re-fetched live)
+[LookupAgent] → check_appointment_status("APT-0001") [LIVE CALL]
+[Agent]  "Appointment APT-0001 is currently Scheduled. This is fetched
+          fresh from the appointment system, not from session memory."
+
+Session A context after 3 turns:
+  Patient: How far ahead should I book an appointment?
+  Agent: You can book appointments up to 30 days in advance...
+  Patient: What about cancelling if I need to?
+  Agent: You need to provide at least 24 hours notice...
+  Patient: And what is the status of APT-0001?
+  Agent: Appointment APT-0001 is currently Scheduled...
+
+════════════════════════════════════════════════════════════
+SESSION B (session-memory-B) – Fresh session
+════════════════════════════════════════════════════════════
+
+[Turn 1] Patient: "Do you know anything about my previous questions?"
+          Memory context: (empty – no prior turns in Session B)
+[Agent]  "I don't have any prior context for this session. How can I
+          help you with clinic information today?"
+
+Evidence: Session B has no knowledge of Session A's conversation.
+          Fresh session starts with empty InMemoryChatMessageHistory.
+          Appointment data was re-fetched from dataset on Turn 3 of Session A,
+          not read from memory.
+
+════════════════════════════════════════════════════════════
+SESSION RESET Demo
+════════════════════════════════════════════════════════════
+
+Before reset – Session A has 3 turns in history.
+After  reset – Session A context is empty (InMemoryChatMessageHistory cleared).
+[Verified by memory.py:reset_session("session-memory-A")]

@@ -1,0 +1,192 @@
+{
+  "top_k": 3,
+  "fixed": [
+    {
+      "query_id": "MQ-001",
+      "query": "How far ahead should I book an appointment?",
+      "strategy": "fixed",
+      "retrieved_parent_docs": [
+        "KB-001"
+      ],
+      "gold_parent_docs": [
+        "KB-001"
+      ],
+      "relevant_retrieved": [
+        "KB-001"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-002",
+      "query": "What notice period is required to cancel an appointment without a fee?",
+      "strategy": "fixed",
+      "retrieved_parent_docs": [
+        "KB-002"
+      ],
+      "gold_parent_docs": [
+        "KB-002"
+      ],
+      "relevant_retrieved": [
+        "KB-002"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-003",
+      "query": "What is the consultation fee for Cardiology specialist visits?",
+      "strategy": "fixed",
+      "retrieved_parent_docs": [
+        "KB-003",
+        "KB-002",
+        "KB-010"
+      ],
+      "gold_parent_docs": [
+        "KB-003"
+      ],
+      "relevant_retrieved": [
+        "KB-003"
+      ],
+      "precision_at_k": 0.3333,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-004",
+      "query": "How do I submit an insurance claim after a visit?",
+      "strategy": "fixed",
+      "retrieved_parent_docs": [
+        "KB-004"
+      ],
+      "gold_parent_docs": [
+        "KB-004"
+      ],
+      "relevant_retrieved": [
+        "KB-004"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-005",
+      "query": "Can I book a telemedicine video consultation from home?",
+      "strategy": "fixed",
+      "retrieved_parent_docs": [
+        "KB-007"
+      ],
+      "gold_parent_docs": [
+        "KB-007"
+      ],
+      "relevant_retrieved": [
+        "KB-007"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    }
+  ],
+  "sentence": [
+    {
+      "query_id": "MQ-001",
+      "query": "How far ahead should I book an appointment?",
+      "strategy": "sentence",
+      "retrieved_parent_docs": [
+        "KB-001"
+      ],
+      "gold_parent_docs": [
+        "KB-001"
+      ],
+      "relevant_retrieved": [
+        "KB-001"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-002",
+      "query": "What notice period is required to cancel an appointment without a fee?",
+      "strategy": "sentence",
+      "retrieved_parent_docs": [
+        "KB-002"
+      ],
+      "gold_parent_docs": [
+        "KB-002"
+      ],
+      "relevant_retrieved": [
+        "KB-002"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-003",
+      "query": "What is the consultation fee for Cardiology specialist visits?",
+      "strategy": "sentence",
+      "retrieved_parent_docs": [
+        "KB-003",
+        "KB-011"
+      ],
+      "gold_parent_docs": [
+        "KB-003"
+      ],
+      "relevant_retrieved": [
+        "KB-003"
+      ],
+      "precision_at_k": 0.5,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-004",
+      "query": "How do I submit an insurance claim after a visit?",
+      "strategy": "sentence",
+      "retrieved_parent_docs": [
+        "KB-004",
+        "KB-010"
+      ],
+      "gold_parent_docs": [
+        "KB-004"
+      ],
+      "relevant_retrieved": [
+        "KB-004"
+      ],
+      "precision_at_k": 0.5,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    },
+    {
+      "query_id": "MQ-005",
+      "query": "Can I book a telemedicine video consultation from home?",
+      "strategy": "sentence",
+      "retrieved_parent_docs": [
+        "KB-007"
+      ],
+      "gold_parent_docs": [
+        "KB-007"
+      ],
+      "relevant_retrieved": [
+        "KB-007"
+      ],
+      "precision_at_k": 1.0,
+      "recall_at_k": 1.0,
+      "fallback_triggered": false
+    }
+  ],
+  "averages": {
+    "fixed": {
+      "precision": 0.8667,
+      "recall": 1.0
+    },
+    "sentence": {
+      "precision": 0.8,
+      "recall": 1.0
+    }
+  },
+  "recommendation": "Fixed-size chunking (F1=0.9286) performs at least as well as sentence chunking (F1=0.8889). Fixed strategy recommended for production due to predictable chunk boundaries."
+}

@@ -1,0 +1,56 @@
+TRANSCRIPT: Budget Rejection + Cache Hit Demo
+============================================================
+Mode: MOCK_LLM
+Budget cap  : MAX_ESTIMATED_TOKENS = 2000, MAX_TURNS = 6
+
+══════════════════════════════════════════════════
+DEMO 1: Budget Rejection (oversized request)
+══════════════════════════════════════════════════
+
+Query: [9000 'A' characters – deliberately oversized test]
+Trace ID: budget-reject-001
+
+Step 1: Budget check (BEFORE any model or tool call)
+  Estimated tokens : 2250  (9000 chars / 4.0 chars_per_token)
+  Cap              : 2000
+  Within budget    : False
+  Rejection code   : BUDGET_EXCEEDED_TOKENS
+  Message          : "Request rejected: estimated 2250 tokens exceeds cap of
+                      2000. Please shorten your query or reduce context.
+                      [MOCK_LLM estimate – not billed tokens]"
+
+Result: Request REJECTED before any Crew kickoff, tool call, or model call.
+        HTTP 429 returned to caller.
+
+normal query budget check:
+  Query: "How far ahead should I book an appointment?"
+  Estimated tokens: 52 (cap: 2000) → Within budget: True ✓
+
+══════════════════════════════════════════════════
+DEMO 2: Cache Hit Evidence
+══════════════════════════════════════════════════
+
+Query: "How far ahead should I book an appointment?"
+Strategy: fixed | KB version: 1.0
+
+Call 1 (MISS):
+  cache.stats() before  → { total_calls: 1, cache_hits: 0, hit_rate: 0.0 }
+  → Full crew pipeline executed (RAG + review + ~245ms)
+  → Result stored in cache at key: sha256("how far ahead..."|1.0|fixed)
+  cache.stats() after   → { total_calls: 1, cache_hits: 0, entries: 1 }
+
+Call 2 – Same query (HIT):
+  cache.get("How far ahead should I book an appointment?") → FOUND
+  cache.stats() after   → { total_calls: 2, cache_hits: 1, hit_rate: 0.5 }
+  → Crew NOT invoked. No RAG call. No AutoGen call.
+  → Served in ~1ms from in-memory dict.
+  → JSONL log: "cache_state": "hit"
+
+Call 3 – Appointment query (SKIPPED, never cached):
+  cache.put("Status of APT-0001", apt_response)
+  cache.get("Status of APT-0001") → None (appointment_status never cached)
+
+Evidence:
+  total_calls: 3 | cache_hits: 1 | entries: 1
+  Cache key namespace: query + kb_version + strategy
+  → KB edits invalidate stale answers (different kb_version → different key)

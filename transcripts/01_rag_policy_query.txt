@@ -1,0 +1,89 @@
+TRANSCRIPT: RAG Policy Query Demo
+============================================================
+Mode   : MOCK_LLM (no API key, no network call)
+Telemetry: CREWAI_DISABLE_TELEMETRY=true, OTEL_SDK_DISABLED=true
+============================================================
+
+Query: "How far ahead should I book an appointment?"
+Session: session-rag-demo-001
+Trace ID: rag-demo-001
+
+── Step 1: Budget Check ─────────────────────────────────
+  Estimated tokens : 52 (cap: 2000)
+  Within budget    : True
+
+── Step 2: PII Masking ──────────────────────────────────
+  Input : "How far ahead should I book an appointment?"
+  Masked: "How far ahead should I book an appointment?" (no PII detected)
+
+── Step 3: Injection Check ──────────────────────────────
+  Result: CLEAN
+
+── Step 4: Cache Lookup ─────────────────────────────────
+  Cache state: MISS (first call)
+  Call counter before: 1 total, 0 hits
+
+── Step 5: Intent Routing ───────────────────────────────
+  Intent detected: "policy"
+  Route: → RetrievalAgent + ComposerAgent
+
+── Step 6: CrewAI Kickoff ───────────────────────────────
+  [RetrievalAgent] Invoking rag_lookup(
+      query="How far ahead should I book an appointment?",
+      strategy="fixed",
+      top_k=3
+  )
+  [rag_lookup] Retrieved 3 chunks from collection "practo_fixed"
+    Chunk 1: KB-001_fixed_0000 (sim=0.7821) parent=KB-001
+      "Patients may book appointments up to 30 days in advance through the
+       clinic portal, mobile app, or by calling the front desk..."
+    Chunk 2: KB-001_fixed_0001 (sim=0.6540) parent=KB-001
+      "Walk-in consultations are accepted subject to doctor availability..."
+    Chunk 3: KB-007_fixed_0002 (sim=0.4210) parent=KB-007
+      "Telemedicine appointments can be booked through the clinic portal..."
+  Fallback triggered: False
+
+  [ComposerAgent] Composing response from retrieved context...
+
+── Step 7: Pydantic Validation ──────────────────────────
+  CrewResponse validated:
+    answer         : "Based on clinic policy: Patients may book appointments
+                      up to 30 days in advance through the clinic portal,
+                      mobile app, or by calling the front desk during
+                      business hours (9 AM – 6 PM, Monday to Saturday).
+                      For specialist appointments, booking at least 3 to 5
+                      business days ahead is advisable. For complete details,
+                      please refer to the official clinic documentation."
+    intent         : "policy"
+    source_ids     : ["KB-001"]
+    confidence     : 0.85
+    needs_escalation: False
+    refusal_reason : None
+
+── Step 8: Groundedness Check ───────────────────────────
+  Overlap score  : 0.312
+  Is grounded    : True (threshold=0.15)
+  Final answer   : (unchanged)
+
+── Step 9: AutoGen Review ───────────────────────────────
+  [Turn 1 – PolicyReviewer]:
+    "REVIEWER: Response appears grounded (overlap=0.312). Policy statements
+     are consistent with retrieved context. Recommend approval."
+  [Turn 2 – FinalEditor]:
+    { "approved": true, "final_answer": "...(unchanged)...",
+      "reason": "Response is grounded in retrieved context and follows
+      clinic policy. No revision required." }
+  Verdict: APPROVED
+
+── Step 10: Cache Store ─────────────────────────────────
+  Stored result under key: sha256(query|1.0|fixed)
+  Call counter after: 2 total, 0 hits (miss on this call)
+
+── Final Response ────────────────────────────────────────
+  answer : "Based on clinic policy: Patients may book appointments up to 30
+             days in advance through the clinic portal..."
+  trace_id: rag-demo-001
+  duration : ~245ms
+
+Evidence: RetrievalAgent rag_lookup tool invoked and returned KB-001 chunks.
+Source KB-001 cited. Pydantic CrewResponse validated. AutoGen approved.

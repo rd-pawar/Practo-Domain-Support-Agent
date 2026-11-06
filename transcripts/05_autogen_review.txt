@@ -1,0 +1,72 @@
+TRANSCRIPT: AutoGen Review Demo – Approval + Revision
+============================================================
+Mode: MOCK_LLM – RoundRobinGroupChat (max_turns=2)
+Two agents: PolicyReviewer | FinalEditor
+StructuredMessage[AutoGenVerdict] registered
+
+══════════════════════════════════════════════════
+CASE 1: Grounded Policy Answer → APPROVAL
+══════════════════════════════════════════════════
+
+Draft answer:
+  "You can book appointments up to 30 days in advance via the clinic portal.
+   For specialists like Cardiology, booking 3-5 days ahead is recommended."
+
+Retrieved context:
+  "Patients may book appointments up to 30 days in advance through the clinic
+   portal... For specialist appointments such as Cardiology, booking at least
+   3 to 5 business days ahead is advisable..."
+
+─────── RoundRobinGroupChat Turn 1 – PolicyReviewer ──────────────────
+  "REVIEWER: Response appears grounded (overlap=0.312). Policy statements
+   are consistent with retrieved context. Recommend approval."
+
+─────── RoundRobinGroupChat Turn 2 – FinalEditor ─────────────────────
+  {
+    "approved": true,
+    "final_answer": "You can book appointments up to 30 days in advance via
+                     the clinic portal. For specialists like Cardiology,
+                     booking 3-5 days ahead is recommended.",
+    "reason": "Response is grounded in retrieved context and follows clinic
+               policy. No revision required."
+  }
+
+Verdict: APPROVED ✓  (answer unchanged)
+
+══════════════════════════════════════════════════
+CASE 2: Ungrounded Answer → REVISION
+══════════════════════════════════════════════════
+
+Draft answer:
+  "The stock market rallied today and crypto is trending upward."
+
+Retrieved context:
+  "Patients may book appointments up to 30 days in advance..."
+
+─────── RoundRobinGroupChat Turn 1 – PolicyReviewer ──────────────────
+  "REVIEWER: Response shows low grounding score (0.031). Answer may contain
+   claims not supported by retrieved policy text. Recommend revision to
+   use only information from the knowledge base."
+
+─────── RoundRobinGroupChat Turn 2 – FinalEditor ─────────────────────
+  {
+    "approved": false,
+    "final_answer": "Based on the available clinic policy information, I can
+                     provide partial guidance. For complete and accurate
+                     information, please contact the clinic front desk directly.",
+    "reason": "Original answer had low groundedness score (0.031). Revised to
+               a safe, partial response that avoids unsupported claims."
+  }
+
+Verdict: REVISED ✗  (answer replaced with safe fallback)
+
+Post-review groundedness re-check on revised answer:
+  overlap=0.0 < threshold → replaced with canonical safe fallback
+  (Review cannot introduce unsupported claims)
+
+══════════════════════════════════════════════════
+SCHEMA: AutoGenVerdict (Pydantic)
+══════════════════════════════════════════════════
+  approved    : bool    → True (Case 1) | False (Case 2)
+  final_answer: str     → Approved or revised answer
+  reason      : str     → Explanation of verdict

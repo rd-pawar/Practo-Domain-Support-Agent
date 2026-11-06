@@ -1,0 +1,83 @@
+{
+  "results": [
+    {
+      "query": "How far ahead should I book an appointment?",
+      "in_scope": true,
+      "expected_doc": "KB-001",
+      "top1_doc": "KB-001",
+      "top1_similarity": 0.705
+    },
+    {
+      "query": "What notice do I need to cancel my appointment?",
+      "in_scope": true,
+      "expected_doc": "KB-002",
+      "top1_doc": "KB-002",
+      "top1_similarity": 0.7205
+    },
+    {
+      "query": "What is the consultation fee for Cardiology?",
+      "in_scope": true,
+      "expected_doc": "KB-003",
+      "top1_doc": "KB-003",
+      "top1_similarity": 0.6767
+    },
+    {
+      "query": "Can I book a telemedicine appointment from home?",
+      "in_scope": true,
+      "expected_doc": "KB-007",
+      "top1_doc": "KB-007",
+      "top1_similarity": 0.6761
+    },
+    {
+      "query": "How does the clinic protect my personal data?",
+      "in_scope": true,
+      "expected_doc": "KB-009",
+      "top1_doc": "KB-009",
+      "top1_similarity": 0.7493
+    },
+    {
+      "query": "Is there a discount for a follow-up visit?",
+      "in_scope": true,
+      "expected_doc": "KB-010",
+      "top1_doc": "KB-010",
+      "top1_similarity": 0.6084
+    },
+    {
+      "query": "What will the weather be like tomorrow?",
+      "in_scope": false,
+      "expected_doc": null,
+      "top1_doc": "KB-008",
+      "top1_similarity": 0.0948
+    },
+    {
+      "query": "What is the capital of France?",
+      "in_scope": false,
+      "expected_doc": null,
+      "top1_doc": "KB-009",
+      "top1_similarity": 0.0758
+    },
+    {
+      "query": "Recommend a good Italian restaurant nearby.",
+      "in_scope": false,
+      "expected_doc": null,
+      "top1_doc": "KB-012",
+      "top1_similarity": 0.1871
+    }
+  ],
+  "in_scope_similarities": [
+    0.705,
+    0.7205,
+    0.6767,
+    0.6761,
+    0.7493,
+    0.6084
+  ],
+  "out_of_scope_similarities": [
+    0.0948,
+    0.0758,
+    0.1871
+  ],
+  "min_in_scope": 0.6084,
+  "max_out_scope": 0.1871,
+  "recommended_threshold": 0.3978
+}

@@ -1,0 +1,70 @@
+TRANSCRIPT: Appointment Lookup Demo (LookupAgent Only)
+============================================================
+Mode   : MOCK_LLM (no API key, no network call)
+Telemetry: CREWAI_DISABLE_TELEMETRY=true, OTEL_SDK_DISABLED=true
+
+LEAST-AUTONOMY PROOF:
+  check_appointment_status is registered ONLY for LookupAgent.
+  RetrievalAgent and ComposerAgent do NOT have this tool.
+  Routing enforced by tool assignment in crew_agents.py, not role prompts.
+============================================================
+
+Query: "What is the status of appointment APT-0001?"
+Session: session-lookup-demo-001
+Trace ID: lookup-demo-001
+
+── Intent Detection ─────────────────────────────────────
+  APT pattern matched: APT-0001
+  Intent: "appointment_status"
+  Route: → LookupAgent + ComposerAgent
+  (RetrievalAgent NOT invoked for pure appointment queries)
+
+── LookupAgent Tool Call ────────────────────────────────
+  [LookupAgent] Invoking check_appointment_status(appointment_id="APT-0001")
+  [check_appointment_status] Record found:
+    {
+      "found": true,
+      "appointment_id": "APT-0001",
+      "patient_name": "Aarav Shah",
+      "age": 34,
+      "category": "Cardiology",
+      "status": "Scheduled",
+      "days_since_created": 12,
+      "consultation_fee_inr": 1450,
+      "follow_up_required": false,
+      "escalation_score": 0.14
+    }
+  NOTE: contact_number is deliberately OMITTED from tool return dict.
+
+── Composer Response ─────────────────────────────────────
+  CrewResponse validated:
+    answer          : "Appointment APT-0001: Status is 'Scheduled'.
+                       Category: Cardiology, Days since created: 12.
+                       Follow-up required: False."
+    intent          : "appointment_status"
+    source_ids      : ["APT-0001"]
+    confidence      : 0.95
+    needs_escalation: False
+    refusal_reason  : None
+
+── AutoGen Verdict ───────────────────────────────────────
+  approved: True – "Response is grounded in retrieved context."
+
+── JSONL Log Event ───────────────────────────────────────
+  {
+    "trace_id": "lookup-demo-001",
+    "timestamp": "2026-11-02T04:29:00Z",
+    "route": "POST /ask",
+    "session_id": "session-lookup-demo-001",
+    "query_masked": "What is the status of appointment APT-0001?",
+    "intent": "appointment_status",
+    "retrieval_ids": ["APT-0001"],
+    "cache_state": "miss",
+    "guardrail_outcomes": { "budget": null, "injection": "CLEAN" },
+    "result_code": "ok",
+    "duration_ms": 188.4,
+    "budget_tokens": 60
+  }
+
+Evidence: LookupAgent is the ONLY agent with check_appointment_status.
+Tool invoked and returned record. contact_number NOT in response or log.

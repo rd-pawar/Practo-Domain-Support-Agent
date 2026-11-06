@@ -1,0 +1,73 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+*.egg-link
+.installed.cfg
+lib/
+lib64/
+
+# ─── Virtual environments ─────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# ─── IDE / Editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ─── Pytest / Coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ─── Logs & audit output ──────────────────────────────────────────────────────
+logs/
+*.log
+*.jsonl
+
+# ─── ChromaDB persistent vector store (large binary blobs) ───────────────────
+chroma_db/
+*.sqlite3
+
+# ─── Sentence-transformers model cache ────────────────────────────────────────
+# (downloaded automatically on first run – do not commit the ~90 MB weights)
+models/
+.cache/
+sentence_transformers_cache/
+
+# ─── Temporary patch/debug scripts ────────────────────────────────────────────
+patch_*.py
+
+# ─── Evaluation results (generated, not source) ───────────────────────────────
+# Uncomment next line to exclude; leave commented to include results.json
+# evaluation/results.json
+
+# ─── OS / Windows ─────────────────────────────────────────────────────────────
+desktop.ini
+$RECYCLE.BIN/

@@ -1,0 +1,8 @@
+{
+    "id": "KB-006",
+    "topic": "lab_test_turnaround",
+    "version": "1.0",
+    "effective_date": "2024-01-01",
+    "parent_doc_id": "KB-006",
+    "content": "Standard laboratory tests such as complete blood count, blood glucose, lipid profile, and liver function tests are processed within 24 to 48 hours of sample collection. Culture-based tests, genetic panels, and certain specialty assays may require 3 to 7 business days due to their complexity; the ordering physician will advise on expected timelines at the time of requesting the test. Results are communicated securely through the patient portal and are simultaneously shared with the treating doctor; patients receive an SMS notification when results are available. STAT (urgent) lab requests processed on-site are typically available within 2 to 4 hours and are reserved for clinical emergencies as determined by the treating doctor. Patients should not adjust medications or make clinical decisions based on lab results without first consulting their doctor."
+}

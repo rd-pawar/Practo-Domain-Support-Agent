@@ -182,10 +182,15 @@
       background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
       border-radius: 20px; padding: 5px 12px; font-size: 11px;
       color: var(--green); font-weight: 500;
+      transition: background 0.4s, border-color 0.4s, color 0.4s;
+    }
+    .health-pill.offline {
+      background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3);
+      color: var(--red);
     }
     .health-dot {
       width: 7px; height: 7px; border-radius: 50%;
-      background: var(--green); animation: pulse-dot 2s infinite;
+      background: currentColor; animation: pulse-dot 2s infinite;
     }
 
     /* Clear chat */
@@ -559,29 +564,44 @@
   }
 
   /* ─── Health poll ──────────────────────── */
+  let _pollTimer = null;
   async function pollHealth() {
+    const pill = document.querySelector('.health-pill');
     try {
-      const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) });
+      const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(5000) });
       const d = await r.json();
       const cs = d.cache_stats || {};
-      document.getElementById('healthLabel').textContent = 'Live · MOCK_LLM';
-      document.getElementById('sideStatus').textContent = '● Online';
+      // Online state
+      pill && pill.classList.remove('offline');
+      document.getElementById('healthLabel').textContent = 'Live \u00b7 MOCK_LLM';
+      document.getElementById('sideStatus').textContent = '\u25cf Online';
       document.getElementById('sideStatus').style.color = 'var(--green)';
-      document.getElementById('sideHits').textContent   = cs.cache_hits   ?? 0;
-      document.getElementById('sideCalls').textContent  = cs.total_calls  ?? 0;
-      document.getElementById('sideEntries').textContent= cs.entries      ?? 0;
+      document.getElementById('sideHits').textContent    = cs.cache_hits    ?? 0;
+      document.getElementById('sideCalls').textContent   = cs.total_calls   ?? 0;
+      document.getElementById('sideEntries').textContent = cs.entries       ?? 0;
       const rate = Math.round((cs.hit_rate ?? 0) * 100);
       document.getElementById('sideHitRate').textContent    = rate + '% hit rate';
       document.getElementById('sideHitRatePct').textContent = rate + '%';
       document.getElementById('cacheBarFill').style.width   = rate + '%';
     } catch {
+      // Offline state
+      pill && pill.classList.add('offline');
       document.getElementById('healthLabel').textContent = 'Offline';
-      document.getElementById('sideStatus').textContent = '● Offline';
+      document.getElementById('sideStatus').textContent = '\u25cf Offline';
       document.getElementById('sideStatus').style.color = 'var(--red)';
+      // Retry sooner when offline
+      if (_pollTimer) clearInterval(_pollTimer);
+      _pollTimer = setInterval(pollHealth, 3000);
     }
   }
-  pollHealth();
-  setInterval(pollHealth, 5000);
+  // Initial: retry every 3s until first success, then slow to 5s
+  function startHealthPoll() {
+    pollHealth().then(() => {
+      if (_pollTimer) clearInterval(_pollTimer);
+      _pollTimer = setInterval(pollHealth, 5000);
+    });
+  }
+  startHealthPoll();
 
   /* ─── Key handler ──────────────────────── */
   function handleKey(e) {
@@ -616,6 +636,22 @@
     msgCount = 0;
   }
 
+  /* ─── Greeting intercept (client-side, no API call needed) ── */
+  const GREETINGS = /^(hi|hello|hey|howdy|good\s*(morning|afternoon|evening)|namaste|hii+|hello+)[\.!?]*$/i;
+  function tryGreeting(query) {
+    if (!GREETINGS.test(query.trim())) return false;
+    const greetMsg = `Hello! I'm Practo's Domain Support Agent. \n\nI can help you with:\n\u2022 Clinic policy questions (booking, cancellation, fees, prescriptions, telemedicine)\n\u2022 Appointment status lookups (e.g. \"Status of APT-0001?\")\n\nI am not able to diagnose conditions or recommend treatments. How can I assist you today?`;
+    appendAgentBubble({
+      trace_id: 'local-greeting',
+      result_code: 'ok',
+      cache_hit: false,
+      crew_response: { intent: 'greeting', answer: greetMsg, source_ids: [], confidence: 1.0 },
+      autogen_verdict: { approved: true },
+      guardrail_outcomes: {}
+    });
+    return true;
+  }
+
   /* ─── Send message ─────────────────────── */
   async function sendMessage() {
     const input = document.getElementById('userInput');
@@ -634,6 +670,13 @@
 
     // User bubble
     appendUserBubble(query);
+
+    // Handle greetings locally — no API call
+    if (tryGreeting(query)) {
+      btn.disabled = false;
+      input.focus();
+      return;
+    }
 
     // Typing indicator
     const typingId = appendTyping();
@@ -726,8 +769,7 @@
     const answer = cr.answer || '(No answer returned)';
     const intent = cr.intent || 'unknown';
     const sources= (cr.source_ids || []).join(', ') || null;
-    const isCached = data.cache_hit;
-    const isBlocked= data.result_code === 'INJECTION_BLOCKED';
+    const isCached = data.cache_hit || data.result_code === 'CACHE_HIT';
 
     const m = document.getElementById('messages');
     const div = document.createElement('div');
@@ -736,12 +778,11 @@
 
     // Build tags
     let tags = '';
-    tags += `<span class="tag tag-intent">intent: ${escHtml(intent)}</span>`;
-    if (sources) tags += `<span class="tag tag-source">📚 ${escHtml(sources)}</span>`;
-    if (gnd.is_grounded === true)  tags += `<span class="tag tag-grounded">✓ grounded</span>`;
-    if (av.approved === true)      tags += `<span class="tag tag-autogen">🤖 AutoGen ✓</span>`;
-    if (isCached)                  tags += `<span class="tag tag-cache">⚡ cache hit</span>`;
-    if (data.result_code === 'CACHE_HIT') tags += `<span class="tag tag-cache">⚡ cache hit</span>`;
+    if (intent !== 'greeting') tags += `<span class="tag tag-intent">intent: ${escHtml(intent)}</span>`;
+    if (sources) tags += `<span class="tag tag-source">\uD83D\uDCDA ${escHtml(sources)}</span>`;
+    if (gnd.is_grounded === true) tags += `<span class="tag tag-grounded">\u2713 grounded</span>`;
+    if (av.approved === true)     tags += `<span class="tag tag-autogen">\uD83E\uDD16 AutoGen \u2713</span>`;
+    if (isCached)                 tags += `<span class="tag tag-cache">\u26A1 cache hit</span>`;
 
     // Detail JSON
     const detail = JSON.stringify({
